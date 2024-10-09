@@ -2,6 +2,7 @@ const express = require("express");
 const mysql = require("mysql2");
 const app = express();
 const cors = require("cors");
+require(dotenv).config()
 
 // Middle ware to extract info from the html
 app.use(
@@ -18,7 +19,7 @@ app.use(express.json());
 const connection = mysql.createConnection({
 	host: "localhost",
 	user: "crudDB",
-	password: "crudDB",
+	password: process.env.db_password, 
 	database: "crudDB",
 	socketPath: "/Applications/MAMP/tmp/mysql/mysql.sock", //path to mysql sock in MAMP
 });
