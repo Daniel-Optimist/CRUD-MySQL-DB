@@ -4,18 +4,14 @@ const app = express();
 const cors = require("cors");
 require('dotenv').config()
 
-// Middle ware to extract info from the html
-app.use(
-	express.urlencoded({
-		extended: true,
-	})
-);
+// Middle ware to access and extract data sent from the forms via req.body;Using true means you can nest rich objects and arrays within the URL-encoded format
+app.use(express.urlencoded({extended: true,}));
 
 // Middle ware to have access to the frontend
 app.use(cors());
 app.use(express.json());
 
-// User account info
+// provide user account info to create connection body
 const connection = mysql.createConnection({
 	host: "localhost",
 	user: "crudDB",
@@ -34,48 +30,48 @@ connection.connect((err) => {
 // Route: / => Homepage route      Defines a GET route for the root path (/).
 app.get("/", (req, res) => res.send("Up and running..."));
 
-// Route: /create-table => the table will be created only when we put http://localhost:2024/create-table on browser DKG instead of app.get("/create-table", we could have used a function expression eg const createTables = the callback function, and then invoke it createTables()
-app.get("/create-table", (req, res) => {
-  // Putting Query on a variable
-  let name = `CREATE TABLE if not exists customers(
-	  customer_id int auto_increment, 
-	  name VARCHAR(255) not null, 
-	  PRIMARY KEY (customer_id)
-	  )`;
+// //1) Route: /create-table => the table will be created only when we put http://localhost:2024/create-table on browser DKG instead of app.get("/create-table", we could have used a function expression eg const createTables = the callback function, and then invoke it createTables()
+// app.get("/create-table", (req, res) => {
+//   // Putting Query on a variable
+//   let name = `CREATE TABLE if not exists customers(
+// 	  customer_id int auto_increment, 
+// 	  name VARCHAR(255) not null, 
+// 	  PRIMARY KEY (customer_id)
+// 	  )`;
 
-  let address = `CREATE TABLE if not exists address(
-  	  address_id int auto_increment, 
-	  customer_id int(11) not null, 
-	  address VARCHAR(255) not null, 
-	  PRIMARY KEY (address_id), 
-	  FOREIGN KEY (customer_id) REFERENCES customers (customer_id))`;
+//   let address = `CREATE TABLE if not exists address(
+//   	  address_id int auto_increment, 
+// 	  customer_id int(11) not null, 
+// 	  address VARCHAR(255) not null, 
+// 	  PRIMARY KEY (address_id), 
+// 	  FOREIGN KEY (customer_id) REFERENCES customers (customer_id))`;
 
-  let company = `CREATE TABLE if not exists company(
-      company_id int auto_increment, 
-	  customer_id int(11) not null, 
-	  company VARCHAR(255) not null, 
-	  PRIMARY KEY (company_id), 
-	  FOREIGN KEY (customer_id) REFERENCES customers (customer_id))`;
+//   let company = `CREATE TABLE if not exists company(
+//       company_id int auto_increment, 
+// 	  customer_id int(11) not null, 
+// 	  company VARCHAR(255) not null, 
+// 	  PRIMARY KEY (company_id), 
+// 	  FOREIGN KEY (customer_id) REFERENCES customers (customer_id))`;
 
-  // Executing the queries we wrote above
-  connection.query(name, (err, results, fields) => {
-    if (err) console.log(`Error Found: ${err}`);
-  });
+//   // Executing the queries we wrote above
+//   connection.query(name, (err, results, fields) => {
+//     if (err) console.log(`Error Found: ${err}`);
+//   });
 
-  connection.query(address, (err, results, fields) => {
-    if (err) console.log(`Error Found: ${err}`);
-  });
+//   connection.query(address, (err, results, fields) => {
+//     if (err) console.log(`Error Found: ${err}`);
+//   });
 
-  connection.query(company, (err, results, fields) => {
-    if (err) console.log(`Error Found: ${err}`);
-  });
+//   connection.query(company, (err, results, fields) => {
+//     if (err) console.log(`Error Found: ${err}`);
+//   });
 
-  res.end("Tables Created"); //DKG Sends a response to the client indicating that the tables have been created.
-  console.log("Tables Created"); //DKG: Logs "Tables Created" to the console (git bash terminal)
-});
-app.listen (2024, ()=>{
-	console.log ("listening and running on http://localhost:2024")
-})
+//   res.end("Tables Created"); //DKG Sends a response to the client indicating that the tables have been created.
+//   console.log("Tables Created"); //DKG: Logs "Tables Created" to the console (git bash terminal)
+// });
+// app.listen (2024, ()=>{
+// 	console.log ("listening and running on http://localhost:2024")
+// })
 /* (err, results, fields) form the callback function parameters, handling the possible outcomes of an asynchronous database query.
 1) err:represents any error that occurs during the execution of the query.If an error occurs, this parameter will hold the error object.
 2)results:contains the result of the query if it executes successfully. (eg array of rows returned from a select query)
@@ -83,9 +79,10 @@ app.listen (2024, ()=>{
 */
 
 
-// // Route: /insert-customers-info => To insert data to the tables
-// app.post("/insert-customers-info", (req, res) => {
-// 	const { name, address, company } = req.body; // Extracting the values sent from the frontend
+// Route: /insert-customers-info => To insert data to the tables
+app.post("/insert-customers-info", (req, res) => {
+	console.table (req.body)// display req body key:value pair in table
+	const { name, address, company } = req.body; // Extracting the values sent from the frontend
 
 // 	let insertName = `INSERT INTO customers (name) VALUES (?)`;
 // 	let insertAddress = `INSERT INTO address (customer_id, address) VALUES (?, ?)`;
@@ -112,10 +109,13 @@ app.listen (2024, ()=>{
 // 		});
 // 	});
 
-// 	res.end("Data inserted successfully!");
-// 	console.log("Data inserted successfully!");
-// });
+	res.end("Data inserted successfully!");
+	console.log("Data inserted successfully!");
+});
 
+app.listen (2024, ()=>{
+	console.log ("listening and running on http://localhost:2024")
+})
 // // Route: /customers-detail-info => To retrieve data from the tables
 // app.get("/customers-detail-info", (req, res) => {
 // 	connection.query(
